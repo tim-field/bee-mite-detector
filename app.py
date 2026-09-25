@@ -1,10 +1,8 @@
-from flask import Flask, render_template, Response, request, jsonify
+from flask import Flask, render_template, request, jsonify
 import threading
 import time
 import subprocess
 import os
-import shlex
-import json
 import signal
 import sys
 from collections import deque
@@ -14,17 +12,27 @@ from bee_health_db import BeeHealthDatabase
 app = Flask(__name__)
 
 # Configuration
-DETECTION_COMMAND = "python /home/ergi/hailo-rpi5-examples/detection.py -i /dev/video0   --hef /home/ergi/hailo-rpi5-examples/first_15k.hef --labels-json /home/ergi/hailo-rpi5-examples/labels.json"
-DEBUG = True  # Enable debugging for troubleshooting
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+DETECTION_INPUT = os.environ.get("BEE_INPUT", "rpi")
+DETECTION_COMMAND = [
+    sys.executable, "-u", os.path.join(PROJECT_DIR, "detection.py"),
+    "--input", DETECTION_INPUT,
+    "--hef-path", os.environ.get("BEE_HEF", os.path.join(PROJECT_DIR, "first_15k.hef")),
+    "--labels-json", os.path.join(PROJECT_DIR, "labels.json"),
+]
+DEBUG = os.environ.get("BEE_DEBUG", "0") == "1"
 MAX_DATA_POINTS = 100  # For time-series data
 
 # Initialize database connection
-db = BeeHealthDatabase(os.path.join(os.path.dirname(__file__), "bee_health.db"))
+db = BeeHealthDatabase(os.environ.get("BEE_DB_PATH", os.path.join(PROJECT_DIR, "bee_health.db")))
 
 # Global variables
 detection_active = False
 detection_thread = None
 detection_process = None
+process_lock = threading.RLock()
+lifecycle_lock = threading.Lock()
+last_detection_error = None
 
 # Time series data for charting
 time_series_data = {
@@ -77,7 +85,9 @@ def update_time_series():
     detection_stats["infestation_ratio"] = ratio
     
     # Update Colony Health Status based on unique object ratio
-    if ratio < RISK_THRESHOLDS["low"]:
+    if detection_stats["unique_bees"] == 0:
+        detection_stats["infestation_risk_level"] = "Unknown"
+    elif ratio < RISK_THRESHOLDS["low"]:
         detection_stats["infestation_risk_level"] = "Low"
     elif ratio < RISK_THRESHOLDS["moderate"]:
         detection_stats["infestation_risk_level"] = "Moderate"
@@ -179,166 +189,29 @@ def parse_detection_output(line):
             if DEBUG:
                 print(f"Error parsing frame count: {e}")
 
-def find_and_kill_processes_by_name(process_name):
-    """Find and kill all processes matching the given name"""
-    try:
-        # Get the list of all running processes
-        output = subprocess.check_output(["ps", "-ef"]).decode()
-        
-        # Find PIDs of processes matching the name
-        pids = []
-        for line in output.split('\n'):
-            if process_name in line and 'grep' not in line:
-                # Extract PID (second column in ps output)
-                parts = line.split()
-                if len(parts) > 1:
-                    try:
-                        pid = int(parts[1])
-                        pids.append(pid)
-                    except ValueError:
-                        pass
-        
-        # Kill each process
-        for pid in pids:
-            try:
-                print(f"Killing process with PID {pid}")
-                os.kill(pid, signal.SIGTERM)
-                # Wait a bit to see if it terminates
-                time.sleep(0.5)
-                # Check if the process is still running
-                try:
-                    os.kill(pid, 0)  # Signal 0 is used to check if a process exists
-                    # Process still exists, try SIGKILL
-                    print(f"Process {pid} didn't terminate with SIGTERM, using SIGKILL")
-                    os.kill(pid, signal.SIGKILL)
-                except OSError:
-                    # Process no longer exists
-                    pass
-            except OSError as e:
-                print(f"Error killing process {pid}: {e}")
-                
-        return len(pids)
-    except Exception as e:
-        print(f"Error finding and killing processes: {e}")
-        return 0
-
-def find_and_kill_processes_by_partial_command(partial_command):
-    """Find and kill processes by partial command string"""
-    try:
-        # Get the list of all running processes with full command
-        output = subprocess.check_output(["ps", "-eo", "pid,cmd"]).decode()
-        
-        # Find PIDs of processes matching the partial command
-        pids = []
-        for line in output.split('\n'):
-            if partial_command in line and 'grep' not in line:
-                # Extract PID (first column in ps output)
-                parts = line.strip().split()
-                if parts:
-                    try:
-                        pid = int(parts[0])
-                        pids.append(pid)
-                    except ValueError:
-                        pass
-        
-        # Kill each process
-        for pid in pids:
-            try:
-                print(f"Killing process with PID {pid} (matches '{partial_command}')")
-                os.kill(pid, signal.SIGTERM)
-                time.sleep(0.5)
-                try:
-                    os.kill(pid, 0)
-                    os.kill(pid, signal.SIGKILL)
-                except OSError:
-                    pass
-            except OSError as e:
-                if e.errno != 3:  # Ignore "no such process" errors
-                    print(f"Error killing process {pid}: {e}")
-                
-        return len(pids)
-    except Exception as e:
-        print(f"Error finding and killing processes: {e}")
-        return 0
-
-def clean_gstreamer_resources():
-    """Clean up orphaned GStreamer resources"""
-    try:
-        # Clean up any stray shared memory segments (often left by GStreamer)
-        subprocess.run(["ipcrm", "-a"], stderr=subprocess.PIPE, shell=True)
-        
-        # Clean up any stray semaphores
-        subprocess.run("for i in `ipcs -s | grep $(whoami) | awk '{print $2}'`; do ipcrm -s $i; done", 
-                      shell=True, stderr=subprocess.PIPE)
-    except Exception as e:
-        print(f"Error cleaning GStreamer resources: {e}")
-
 def terminate_detection():
-    """Terminate the detection process and ensure all related processes are stopped"""
+    """Stop only our child process group, allowing GStreamer to release the camera."""
     global detection_process
-    
-    print("Terminating detection processes...")
-    
-    # First attempt to terminate our subprocess if it exists
-    if detection_process:
-        try:
-            pid = detection_process.pid
-            print(f"Terminating main detection process (PID: {pid})")
-            
-            # Send SIGINT to allow graceful GStreamer pipeline shutdown
-            # This is important! SIGINT allows GStreamer to clean up properly
+    with process_lock:
+        process = detection_process
+        if process is None:
+            return
+        for sig, timeout in ((signal.SIGINT, 3), (signal.SIGTERM, 2), (signal.SIGKILL, 2)):
+            if process.poll() is not None:
+                break
             try:
-                os.kill(pid, signal.SIGINT)
-            
-                # Give more time for GStreamer pipeline to clean up
-                time.sleep(2)
-                
-                # Check if process is still running
-                try:
-                    os.kill(pid, 0)  # Signal 0 is used to check if a process exists
-                    print(f"Process {pid} still exists, using SIGTERM")
-                    os.kill(pid, signal.SIGTERM)
-                    time.sleep(1)
-                    
-                    # Check again and use SIGKILL as last resort
-                    try:
-                        os.kill(pid, 0)
-                        print(f"Process {pid} still exists, using SIGKILL")
-                        os.kill(pid, signal.SIGKILL)
-                    except OSError:
-                        pass
-                except OSError:
-                    # Process no longer exists
-                    pass
-            except OSError:
-                # Process may already be gone
-                pass
-                
-        except Exception as e:
-            print(f"Error terminating process: {e}")
-            
+                os.killpg(process.pid, sig)
+                process.wait(timeout=timeout)
+                break
+            except ProcessLookupError:
+                break
+            except subprocess.TimeoutExpired:
+                continue
         detection_process = None
-    
-    # Kill all related processes
-    process_names = ["detection.py", "GStreamerDetectionApp", "Hailo Detection App"]
-    for name in process_names:
-        find_and_kill_processes_by_name(name)
-    
-    # Kill any GStreamer processes that might be related
-    killed_count = find_and_kill_processes_by_name("gst-launch")
-    if killed_count > 0:
-        print(f"Killed {killed_count} GStreamer processes")
-        
-    # Also kill any orphaned GStreamer elements by partial command
-    for gst_element in ["hailonet", "hailotracker", "hailofilter", "hailooverlay", "autovideosink"]:
-        find_and_kill_processes_by_partial_command(gst_element)
-        
-    # Give some time for processes to clean up
-    time.sleep(0.1)
 
 def detection_loop():
     """Thread function for the detection process"""
-    global detection_active, detection_stats, detection_process
+    global detection_active, detection_stats, detection_process, last_detection_error
     
     try:
         # Reset statistics
@@ -356,7 +229,7 @@ def detection_loop():
         detection_stats["last_frame"] = 0
         
         # Start a new database session
-        source_file = DETECTION_COMMAND.split(" ")[3]  # Extract video file name
+        source_file = DETECTION_INPUT
         db.start_new_session(source=source_file, notes="Automatic detection")
         
         # Clear time series data
@@ -365,69 +238,67 @@ def detection_loop():
         time_series_data["varroa_counts"].clear()
         time_series_data["infestation_ratio"].clear()
         
-        # Set environment variables for display
         env = os.environ.copy()
-        env["DISPLAY"] = ":0"  # Use the main display
-        
-        # Ensure any leftover detection processes are terminated
-        terminate_detection()
-        clean_gstreamer_resources()
-        
-        # Small delay to ensure cleanup is complete
-        time.sleep(0.1)
         
         # Launch the detection command as a subprocess
         if DEBUG:
             print(f"Starting detection process with command: {DETECTION_COMMAND}")
         
-        # Use shell=True for more reliable execution
-        detection_process = subprocess.Popen(
-            DETECTION_COMMAND,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1,  # Line buffered
-            universal_newlines=True,
-            env=env,  # Pass the environment with DISPLAY set
-            cwd="/home/ergi/hailo-rpi5-examples"  # Set working directory
-        )
-        
-        print(f"Started detection process with PID: {detection_process.pid}")
-        
+        # Own a process group so stopping detection never kills other camera/apps.
+        with process_lock:
+            if not detection_active:
+                return
+            detection_process = subprocess.Popen(
+                DETECTION_COMMAND,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Drain errors too; avoid a full stderr pipe.
+                text=True,
+                bufsize=1,
+                env=env,
+                cwd=PROJECT_DIR,
+                start_new_session=True,
+            )
+            process = detection_process
+
+        print(f"Started detection process with PID: {process.pid}")
+
         # Process stdout in real-time
-        while detection_active and detection_process and detection_process.poll() is None:
-            # Read a line from stdout with timeout
-            line = detection_process.stdout.readline()
+        recent_output = deque(maxlen=12)
+        while detection_active:
+            line = process.stdout.readline()
             if not line:
-                # No more output but process is still running
-                time.sleep(0.1)
-                continue
+                break
                 
             line = line.strip()
             if line:
-                print(f"Detection output: {line}")
+                recent_output.append(line)
+                if DEBUG:
+                    print(f"Detection output: {line}")
                 parse_detection_output(line)
-                
+        if detection_active:
+            code = process.wait()
+            last_detection_error = f"Detection exited ({code}): " + "\n".join(recent_output)
+            print(last_detection_error)
+
     except Exception as e:
+        last_detection_error = str(e)
         print(f"Error in detection loop: {e}")
     finally:
-        # End the database session
-        db.end_session()
-        
-        # Make sure to terminate the detection process and any child processes
-        terminate_detection()
-        clean_gstreamer_resources()
-        
-        detection_active = False
-        print("Detection thread exiting")
+        try:
+            terminate_detection()
+            db.end_session()
+        finally:
+            detection_active = False
+            print("Detection thread exiting")
 
 def signal_handler(sig, frame):
     """Handle termination signals"""
     print(f"Received signal {sig}, cleaning up and exiting...")
-    db.end_session()  # Make sure to end any active database session
+    global detection_active
+    detection_active = False
     terminate_detection()
-    clean_gstreamer_resources()
+    if detection_thread:
+        detection_thread.join(timeout=5)
     sys.exit(0)
 
 @app.route('/')
@@ -438,61 +309,44 @@ def index():
 @app.route('/start_detection', methods=['POST'])
 def start_detection():
     """Start the detection process"""
-    global detection_active, detection_thread
-    
-    if not detection_active:
-        # First, make sure any existing processes are terminated
-        terminate_detection()
-        clean_gstreamer_resources()
-        
-        # Small delay to ensure cleanup is complete
-        time.sleep(0.1)
-        
-        # Now start a new detection process
+    global detection_active, detection_thread, last_detection_error
+    with lifecycle_lock:
+        if detection_active:
+            return jsonify({"status": "already_running"})
+        if detection_thread and detection_thread.is_alive():
+            return jsonify({"status": "error", "message": "Previous session is still stopping"}), 409
+        last_detection_error = None
         detection_active = True
-        detection_thread = threading.Thread(target=detection_loop)
-        detection_thread.daemon = True
+        detection_thread = threading.Thread(target=detection_loop, daemon=True)
         detection_thread.start()
-        
-        # Give it a moment to start up
+        # Catch immediate startup failures instead of silently claiming success.
         time.sleep(1)
-        
+        if not detection_active:
+            return jsonify({"status": "error", "message": last_detection_error}), 500
         return jsonify({"status": "started"})
-    
-    return jsonify({"status": "already_running"})
 
 @app.route('/stop_detection', methods=['POST'])
 def stop_detection():
     """Stop the detection process"""
     global detection_active
     
-    if detection_active:
-        print("Stopping detection...")
-        
-        # Set flag to stop the thread
+    with lifecycle_lock:
+        if not detection_active and not (detection_thread and detection_thread.is_alive()):
+            return jsonify({"status": "already_stopped"})
         detection_active = False
-        
-        # Terminate all detection processes
         terminate_detection()
-        
-        # Clean up GStreamer resources
-        clean_gstreamer_resources()
-        
-        # Wait for thread to finish - give it more time
         if detection_thread:
             detection_thread.join(timeout=5.0)
-            
-        print("Detection stopped")
+            if detection_thread.is_alive():
+                return jsonify({"status": "error", "message": "Session is still stopping"}), 503
         return jsonify({"status": "stopped"})
-    
-    return jsonify({"status": "already_stopped"})
 
 @app.route('/get_stats')
 def get_stats():
     """Return the current detection statistics"""
     if DEBUG:
         print(f"Sending stats to client: {detection_stats}")
-    return jsonify(detection_stats)
+    return jsonify({**detection_stats, "active": detection_active, "error": last_detection_error})
 
 @app.route('/get_time_series')
 def get_time_series():
@@ -597,12 +451,6 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    # Ensure no detection processes are running when we start
-    terminate_detection()
-    clean_gstreamer_resources()
-    
-    # Small delay to ensure cleanup is complete
-    time.sleep(0.1)
-    
     # Start the Flask app
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # LAN-only development server; never expose this unauthenticated app publicly.
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
