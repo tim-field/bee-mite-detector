@@ -1,3 +1,10 @@
+# Local Raspberry Pi setup and runtime data
+.deps/
+.venv/
+*.log
+camera-check.jpg
+bee_health.db-*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

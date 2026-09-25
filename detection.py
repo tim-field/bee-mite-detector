@@ -11,7 +11,19 @@ from hailo_apps_infra.hailo_rpi_common import (
     get_numpy_from_buffer,
     app_callback_class,
 )
-from hailo_apps_infra.detection_pipeline import GStreamerDetectionApp
+from hailo_apps_infra.detection_pipeline import GStreamerDetectionApp as BaseDetectionApp
+
+
+class GStreamerDetectionApp(BaseDetectionApp):
+    """Use the OS-matched postprocessor and support operation over SSH."""
+
+    def get_pipeline_string(self):
+        # The upstream constructor calls this before creating the pipeline.
+        self.post_process_so = os.path.join(
+            os.environ['TAPPAS_POST_PROC_DIR'], 'libyolo_hailortpp_post.so'
+        )
+        self.video_sink = os.environ.get('BEE_VIDEO_SINK', 'fakesink')
+        return super().get_pipeline_string()
 
 # -----------------------------------------------------------------------------------------------
 # CONFIGURABLE PARAMETERS - Adjust these to optimize tracking
@@ -147,7 +159,7 @@ def app_callback(pad, info, user_data):
     string_to_print += f"Unique bees: {user_data.get_unique_bee_count()}\n"
     string_to_print += f"Unique varroa: {user_data.get_unique_varroa_count()}\n"
             
-    if user_data.use_frame:
+    if user_data.use_frame and frame is not None:
         # Note: using imshow will not work here, as the callback function is not running in the main thread
         # Let's print the detection counts to the frame
         cv2.putText(frame, f"Bees: {user_data.get_bee_count()}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
@@ -201,7 +213,7 @@ def app_callback(pad, info, user_data):
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         user_data.set_frame(frame)
         
-    print(string_to_print)
+    print(string_to_print, flush=True)
     return Gst.PadProbeReturn.OK
 
 if __name__ == "__main__":
