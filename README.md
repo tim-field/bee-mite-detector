@@ -99,6 +99,13 @@ All tests confirm the system meets design specifications for accuracy and real-t
 
 # Installation & Deployment Guide
 
+> **Updated setup for this fork:** use [Raspberry Pi setup](docs/raspberry-pi-setup.md)
+> for the tested Trixie / Python 3.13 / Hailo-8 / TAPPAS 5.1 configuration.
+> It fixes the original absolute paths and virtual environment, installs the missing
+> application helpers, and supports headless camera inference. The historical
+> instructions below describe the author's older platform; do not use their Hailo
+> installation steps to downgrade an already-working Pi.
+
 ## Prerequisites
 
 ### Hardware Requirements
