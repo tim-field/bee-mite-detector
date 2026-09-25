@@ -12,16 +12,16 @@ class EmailService:
         self.smtp_server = "smtp.gmail.com"
         self.smtp_port = 587
         
-        self.username = "ergimira22@gmail.com"
-        self.password = "ugyoonebbuuuojdg"
+        # Email is opt-in; never use credentials committed by the original author.
+        self.username = os.environ.get("BEE_MONITOR_EMAIL", "")
+        self.password = os.environ.get("BEE_MONITOR_EMAIL_PASSWORD", "")
 
         
         # Print debug info about credentials (without showing the actual values)
         print(f"Email service initialized. Username available: {'Yes' if self.username else 'No'}, "
               f"Password available: {'Yes' if self.password else 'No'}")
         
-        # Hardcoded recipient email - CHANGE THIS TO YOUR EMAIL
-        self.recipient = "ergimira25@gmail.com"
+        self.recipient = os.environ.get("BEE_MONITOR_EMAIL_RECIPIENT", "")
         
         # Timeout settings
         self.connect_timeout = 10  # seconds
@@ -30,8 +30,8 @@ class EmailService:
     def send_session_summary(self, session_id, db_path):
         """Send a summary email for a specific session"""
         # Skip if credentials missing
-        if not self.username or not self.password:
-            print("Email not sent: Missing email credentials")
+        if not self.username or not self.password or not self.recipient:
+            print("Email not sent: Missing email credentials or recipient")
             print(f"Username available: {'Yes' if self.username else 'No'}, "
                   f"Password available: {'Yes' if self.password else 'No'}")
             return False
@@ -73,7 +73,7 @@ class EmailService:
             
             # Connect to server and send
             server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=self.connect_timeout)
-            server.set_debuglevel(1)  # Enable SMTP debugging
+            # Do not enable SMTP debug logging: it can expose authentication data.
             
             print("Starting TLS...")
             server.starttls()
