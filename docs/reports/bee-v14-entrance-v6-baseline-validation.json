@@ -1,0 +1,429 @@
+{
+  "evaluation": "bee-v14-entrance-v6-baseline-val-review-v1",
+  "status": "provisional; all label-review queue items resolved, coverage limitations remain",
+  "dataset": {
+    "path": "datasets/bee-v14-entrance-v6",
+    "revision": "v6 (v5 + 68_jpg additional bee labels)",
+    "label_edits": [
+      "valid/labels/65_jpg.rf.e5e4bdf2d7f76b825f9d0d128e54c63a.txt",
+      "valid/labels/52_jpg.rf.e6e940907c9f4997c4c99aee1c025454.txt",
+      "valid/labels/52_jpg.rf.fc121649f3cfbed069c1f774694254cc.txt",
+      "valid/labels/68_jpg.rf.26ac1f88e9c5a5ae7323aefd94069b79.txt",
+      "valid/labels/68_jpg.rf.914d0f58caf23dca2fc46af27ee54ac1.txt"
+    ],
+    "images": 13,
+    "filename_groups": 8,
+    "bee_boxes": 31,
+    "varroa_boxes": 15
+  },
+  "checkpoint": {
+    "path": "runs/bee-v14-baseline/weights/best.pt",
+    "sha256": "c3b289284b5324be27b5176d0bdaac702529dcc14089c38bd37308ad4ceb052a"
+  },
+  "settings": {
+    "imgsz": 640,
+    "batch": 8,
+    "device": 0,
+    "half": false,
+    "collection_confidence": 0.001,
+    "nms_iou": 0.7,
+    "max_det": 300
+  },
+  "split": "valid",
+  "test_split_evaluated": false,
+  "environment": {
+    "torch": "2.11.0+cu128",
+    "ultralytics": "8.4.162",
+    "gpu": "NVIDIA GeForce RTX 3060 Ti"
+  },
+  "per_class": {
+    "bee": {
+      "precision": 0.87286,
+      "recall": 0.29032,
+      "AP50": 0.45878,
+      "AP50-95": 0.26727,
+      "instances": 31
+    },
+    "varroa": {
+      "precision": 0.80348,
+      "recall": 0.73333,
+      "AP50": 0.76811,
+      "AP50-95": 0.57559,
+      "instances": 15
+    }
+  },
+  "mean": {
+    "precision": 0.838169306583339,
+    "recall": 0.5118279569892473,
+    "AP50": 0.6134470509531738,
+    "AP50-95": 0.4214312912146164
+  },
+  "vs_v5": {
+    "note": "v6 labels the additional visible flying bees in 68_jpg. The dip is the revealed truth: the model misses all 8 bee boxes per image and classifies 5 of them as mites (0.34-0.76). Whole-bee-as-mite confusion is now measured rather than hidden.",
+    "bee_AP50": [
+      0.6613,
+      0.45878
+    ],
+    "mean_AP50": [
+      0.7147,
+      0.6134470509531738
+    ]
+  },
+  "whole_bee_as_mite": {
+    "images": [
+      "68_jpg.rf.26ac1f88e9c5a5ae7323aefd94069b79.jpg",
+      "68_jpg.rf.914d0f58caf23dca2fc46af27ee54ac1.jpg"
+    ],
+    "bee_boxes": 16,
+    "matched": 0,
+    "predicted_as_mite": 5,
+    "confidence_range": [
+      0.34,
+      0.76
+    ]
+  },
+  "fixed_thresholds": [
+    {
+      "confidence": 0.05,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 13,
+          "fp": 48,
+          "fn": 18,
+          "precision": 0.21311475409836064,
+          "recall": 0.41935483870967744
+        },
+        "varroa": {
+          "tp": 12,
+          "fp": 21,
+          "fn": 3,
+          "precision": 0.36363636363636365,
+          "recall": 0.8
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 13,
+          "detected": 10,
+          "recall": 0.7692307692307693
+        },
+        ">=64px": {
+          "total": 2,
+          "detected": 2,
+          "recall": 1.0
+        }
+      }
+    },
+    {
+      "confidence": 0.1,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 12,
+          "fp": 24,
+          "fn": 19,
+          "precision": 0.3333333333333333,
+          "recall": 0.3870967741935484
+        },
+        "varroa": {
+          "tp": 11,
+          "fp": 11,
+          "fn": 4,
+          "precision": 0.5,
+          "recall": 0.7333333333333333
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 13,
+          "detected": 9,
+          "recall": 0.6923076923076923
+        },
+        ">=64px": {
+          "total": 2,
+          "detected": 2,
+          "recall": 1.0
+        }
+      }
+    },
+    {
+      "confidence": 0.2,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 12,
+          "fp": 7,
+          "fn": 19,
+          "precision": 0.631578947368421,
+          "recall": 0.3870967741935484
+        },
+        "varroa": {
+          "tp": 11,
+          "fp": 7,
+          "fn": 4,
+          "precision": 0.6111111111111112,
+          "recall": 0.7333333333333333
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 13,
+          "detected": 9,
+          "recall": 0.6923076923076923
+        },
+        ">=64px": {
+          "total": 2,
+          "detected": 2,
+          "recall": 1.0
+        }
+      }
+    },
+    {
+      "confidence": 0.25,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 12,
+          "fp": 5,
+          "fn": 19,
+          "precision": 0.7058823529411765,
+          "recall": 0.3870967741935484
+        },
+        "varroa": {
+          "tp": 11,
+          "fp": 7,
+          "fn": 4,
+          "precision": 0.6111111111111112,
+          "recall": 0.7333333333333333
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 13,
+          "detected": 9,
+          "recall": 0.6923076923076923
+        },
+        ">=64px": {
+          "total": 2,
+          "detected": 2,
+          "recall": 1.0
+        }
+      }
+    },
+    {
+      "confidence": 0.3,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 12,
+          "fp": 4,
+          "fn": 19,
+          "precision": 0.75,
+          "recall": 0.3870967741935484
+        },
+        "varroa": {
+          "tp": 11,
+          "fp": 7,
+          "fn": 4,
+          "precision": 0.6111111111111112,
+          "recall": 0.7333333333333333
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 13,
+          "detected": 9,
+          "recall": 0.6923076923076923
+        },
+        ">=64px": {
+          "total": 2,
+          "detected": 2,
+          "recall": 1.0
+        }
+      }
+    },
+    {
+      "confidence": 0.4,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 10,
+          "fp": 4,
+          "fn": 21,
+          "precision": 0.7142857142857143,
+          "recall": 0.3225806451612903
+        },
+        "varroa": {
+          "tp": 11,
+          "fp": 4,
+          "fn": 4,
+          "precision": 0.7333333333333333,
+          "recall": 0.7333333333333333
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 13,
+          "detected": 9,
+          "recall": 0.6923076923076923
+        },
+        ">=64px": {
+          "total": 2,
+          "detected": 2,
+          "recall": 1.0
+        }
+      }
+    },
+    {
+      "confidence": 0.5,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 9,
+          "fp": 0,
+          "fn": 22,
+          "precision": 1.0,
+          "recall": 0.2903225806451613
+        },
+        "varroa": {
+          "tp": 11,
+          "fp": 3,
+          "fn": 4,
+          "precision": 0.7857142857142857,
+          "recall": 0.7333333333333333
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 13,
+          "detected": 9,
+          "recall": 0.6923076923076923
+        },
+        ">=64px": {
+          "total": 2,
+          "detected": 2,
+          "recall": 1.0
+        }
+      }
+    },
+    {
+      "confidence": 0.7,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 26,
+          "precision": 1.0,
+          "recall": 0.16129032258064516
+        },
+        "varroa": {
+          "tp": 11,
+          "fp": 1,
+          "fn": 4,
+          "precision": 0.9166666666666666,
+          "recall": 0.7333333333333333
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 13,
+          "detected": 9,
+          "recall": 0.6923076923076923
+        },
+        ">=64px": {
+          "total": 2,
+          "detected": 2,
+          "recall": 1.0
+        }
+      }
+    }
+  ],
+  "artifacts": {
+    "mac": "training-artifacts/bee-v14-entrance-v6-baseline-val-review-v1 (Git-ignored)",
+    "wsl": "/home/tim/bee-mite-training/evaluations/bee-v14-entrance-v6-baseline-val-review-v1",
+    "export": "training-artifacts/image-review/exports/bee-v14-entrance-v6"
+  },
+  "script_sha256": "de3c393f2f7dc6946b7477f44c67d6443f92ae15c60c591fb88da3a5fc8f1543"
+}

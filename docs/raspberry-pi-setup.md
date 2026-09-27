@@ -131,6 +131,25 @@ systemctl --user stop bee-mite-detector
 This is a transient unit, **not boot-time autostart**. Only run one server/camera
 consumer at a time. A permanent service can be added once the setup is validated.
 
+## 4. Deploying later changes from the Mac checkout
+
+The Pi deployment was created by copying files, not by cloning this fork, so
+local edits do not reach it automatically. From this checkout on the Mac:
+
+```bash
+bash deploy_pi.sh --dry-run   # show what would change, deploy nothing
+bash deploy_pi.sh             # sync, validate on the Pi, restart if needed
+```
+
+The script rechecks SSH and dashboard state, aborts while detection is active
+(unless `--force`), syncs with rsync **without `--delete`**, validates shell
+syntax and Python compilation on the Pi, and restarts the `bee-mite-detector`
+user unit only when runtime files changed. Preserved on the Pi: `.venv/`,
+`.deps/`, logs, SQLite history (including the tracked example `bee_health.db`,
+which is never copied), and camera captures. No sudo, driver changes, package
+installs, or email credentials are involved. See `bash deploy_pi.sh --help` for
+`--no-restart`, `--skip-hef`, `--remote-tests`, and environment overrides.
+
 ## Validation and limits
 
 Verified on the setup above:

@@ -11,22 +11,21 @@ class EmailService:
         """Initialize the email service with SMTP settings"""
         self.smtp_server = "smtp.gmail.com"
         self.smtp_port = 587
-        
-        # Email is opt-in; never use credentials committed by the original author.
+
         self.username = os.environ.get("BEE_MONITOR_EMAIL", "")
         self.password = os.environ.get("BEE_MONITOR_EMAIL_PASSWORD", "")
 
-        
+
         # Print debug info about credentials (without showing the actual values)
         print(f"Email service initialized. Username available: {'Yes' if self.username else 'No'}, "
               f"Password available: {'Yes' if self.password else 'No'}")
-        
+
         self.recipient = os.environ.get("BEE_MONITOR_EMAIL_RECIPIENT", "")
-        
+
         # Timeout settings
         self.connect_timeout = 10  # seconds
         self.socket_timeout = 15  # seconds
-        
+
     def send_session_summary(self, session_id, db_path):
         """Send a summary email for a specific session"""
         # Skip if credentials missing
@@ -35,61 +34,61 @@ class EmailService:
             print(f"Username available: {'Yes' if self.username else 'No'}, "
                   f"Password available: {'Yes' if self.password else 'No'}")
             return False
-        
+
         # Print recipient for debugging
         print(f"Attempting to send email to: {self.recipient}")
-        
+
         # Get session data
         session_data = self._get_session_data(session_id, db_path)
         if not session_data:
             print(f"Email not sent: Could not retrieve data for session {session_id}")
             return False
-        
+
         # Format email content
         subject = f"Bee Colony Health Monitor - Session Summary #{session_id}"
         html_content = self._format_email_content(session_data)
         text_content = self._format_plain_text_content(session_data)
-        
+
         # Send email
         try:
             print(f"Creating email message for session {session_id}...")
-            
+
             # Create message
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
             msg['From'] = self.username
             msg['To'] = self.recipient
-            
+
             # Attach parts
             part1 = MIMEText(text_content, 'plain')
             part2 = MIMEText(html_content, 'html')
             msg.attach(part1)
             msg.attach(part2)
-            
+
             print(f"Connecting to SMTP server {self.smtp_server}:{self.smtp_port}...")
-            
+
             # Set socket timeout
             socket.setdefaulttimeout(self.socket_timeout)
-            
+
             # Connect to server and send
             server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=self.connect_timeout)
             # Do not enable SMTP debug logging: it can expose authentication data.
-            
+
             print("Starting TLS...")
             server.starttls()
-            
+
             print("Logging in...")
             server.login(self.username, self.password)
-            
+
             print(f"Sending email from {self.username} to {self.recipient}...")
             server.sendmail(self.username, self.recipient, msg.as_string())
-            
+
             print("Quitting SMTP server...")
             server.quit()
-            
+
             print(f"Session summary email sent to {self.recipient}")
             return True
-            
+
         except Exception as e:
             print(f"Failed to send email: {e}")
             print(f"Error type: {type(e).__name__}")
@@ -101,7 +100,7 @@ class EmailService:
             elif isinstance(e, ConnectionRefusedError):
                 print(f"Connection refused. Check if the SMTP server is reachable.")
             return False
-            
+
     def _get_session_data(self, session_id, db_path):
         """Retrieve session data from the database"""
         try:
@@ -109,7 +108,7 @@ class EmailService:
             conn = sqlite3.connect(db_path)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            
+
             # Get session info
             cursor.execute(
                 'SELECT * FROM sessions WHERE session_id = ?',
@@ -119,29 +118,29 @@ class EmailService:
             if not session:
                 print(f"Session {session_id} not found in database")
                 return None
-                
+
             # Get metrics for this session
             cursor.execute(
-                '''SELECT * FROM bee_metrics 
-                WHERE session_id = ? 
+                '''SELECT * FROM bee_metrics
+                WHERE session_id = ?
                 ORDER BY timestamp DESC''',
                 (session_id,)
             )
             metrics = cursor.fetchall()
             print(f"Found {len(metrics)} metrics for session {session_id}")
-            
+
             # Calculate summary statistics
             bee_counts = [m['unique_bee_count'] for m in metrics]
             varroa_counts = [m['unique_varroa_count'] for m in metrics]
             ratios = [m['infestation_ratio'] for m in metrics]
-            
+
             # Calculate total unique bees and varroa for the entire session
             total_unique_bees = max(bee_counts) if bee_counts else 0
             total_unique_varroa = max(varroa_counts) if varroa_counts else 0
-            
+
             # Calculate overall infestation ratio
             overall_ratio = total_unique_varroa / total_unique_bees if total_unique_bees > 0 else 0
-            
+
             summary = {
                 'session': dict(session),
                 'metrics_count': len(metrics),
@@ -167,18 +166,18 @@ class EmailService:
                 'overall_ratio': overall_ratio,
                 'latest_metrics': [dict(m) for m in metrics[:10]]  # Include last 10 metrics
             }
-            
+
             conn.close()
             return summary
-            
+
         except Exception as e:
             print(f"Error retrieving session data: {e}")
             return None
-    
+
     def _format_email_content(self, data):
         """Format the email content as HTML"""
         session = data['session']
-        
+
         # Determine risk level based on overall infestation ratio
         overall_ratio = data['overall_ratio']
         if overall_ratio < 0.05:
@@ -193,7 +192,7 @@ class EmailService:
         else:
             risk_level = "Critical"
             risk_color = "#dc3545"  # red
-        
+
         # Format duration
         if session['end_time'] and session['start_time']:
             try:
@@ -205,7 +204,7 @@ class EmailService:
                 duration_str = "Unknown"
         else:
             duration_str = "Session not completed"
-        
+
         # Create HTML content
         html = f"""
         <html>
@@ -231,7 +230,7 @@ class EmailService:
                 <h1>🐝 Bee Colony Health Monitor</h1>
                 <p>Session Summary Report</p>
             </div>
-            
+
             <div class="summary-box">
                 <h3>Session Overview</h3>
                 <p>
@@ -243,7 +242,7 @@ class EmailService:
                     <strong>Colony Health Status:</strong> <span class="risk-badge">{risk_level} Risk</span>
                 </p>
             </div>
-            
+
             <h2>Detection Summary</h2>
             <table>
                 <tr>
@@ -263,7 +262,7 @@ class EmailService:
                     <td>{data['overall_ratio']:.3f}</td>
                 </tr>
             </table>
-            
+
             <h2>Recent Metrics</h2>
             <table>
                 <tr>
@@ -273,7 +272,7 @@ class EmailService:
                     <th>Ratio</th>
                 </tr>
                 """
-        
+
         # Add the latest metrics to the table
         for metric in data['latest_metrics']:
             html += f"""
@@ -284,10 +283,10 @@ class EmailService:
                     <td>{metric['infestation_ratio']:.3f}</td>
                 </tr>
             """
-            
+
         html += f"""
             </table>
-            
+
             <div class="footer">
                 <p>This is an automated report from the Bee Colony Health Monitor system. Total metrics collected: {data['metrics_count']}</p>
                 <p>Notes: {session['notes'] or 'None'}</p>
@@ -295,13 +294,13 @@ class EmailService:
         </body>
         </html>
         """
-        
+
         return html
-        
+
     def _format_plain_text_content(self, data):
         """Format the email content as plain text"""
         session = data['session']
-        
+
         # Determine risk level based on overall infestation ratio
         overall_ratio = data['overall_ratio']
         if overall_ratio < 0.05:
@@ -312,7 +311,7 @@ class EmailService:
             risk_level = "High"
         else:
             risk_level = "Critical"
-        
+
         # Format duration
         if session['end_time'] and session['start_time']:
             try:
@@ -324,7 +323,7 @@ class EmailService:
                 duration_str = "Unknown"
         else:
             duration_str = "Session not completed"
-        
+
         # Create plain text content
         text = f"""
 BEE COLONY HEALTH MONITOR
@@ -348,16 +347,16 @@ Overall Infestation Ratio: {data['overall_ratio']:.3f}
 RECENT METRICS
 -----------------------
 """
-        
+
         # Add latest metrics
         for metric in data['latest_metrics']:
             text += f"  {metric['timestamp']} - Bees: {metric['unique_bee_count']}, Varroa: {metric['unique_varroa_count']}, Ratio: {metric['infestation_ratio']:.3f}\n"
-        
+
         text += f"""
 -----------------------
 This is an automated report from the Bee Colony Health Monitor system.
 Total metrics collected: {data['metrics_count']}
 Notes: {session['notes'] or 'None'}
 """
-        
+
         return text

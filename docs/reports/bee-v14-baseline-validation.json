@@ -1,0 +1,510 @@
+{
+  "evaluation": "bee-v14-baseline-val-review-v2",
+  "split": "val",
+  "test_split_evaluated": false,
+  "provenance": {
+    "originals": {
+      "runs/bee-v14-baseline/weights/best.pt": "c3b289284b5324be27b5176d0bdaac702529dcc14089c38bd37308ad4ceb052a",
+      "runs/bee-v14-baseline/args.yaml": "a7ff32d4aaa1dbbcf09362dbb2649eb6ac8cee0c43ba61753ba78c22eb8cdf56",
+      "runs/bee-v14-baseline/results.csv": "517dc41fdf2fe4d366fb98c72052843e8f530b4649db24a639d351395270b7ed",
+      "datasets/bee-v14-grouped-v1/manifest.json": "6ca4df3a968cfcbf62a9a66f499e3126ebeaa5d76e9b90bdab3b83f2fd3eb988",
+      "datasets/bee-v14-grouped-v1/audit.json": "0f64e0a605803433e5bd8366615649f122398491b801df23a2da7dad84230712",
+      "datasets/bee-v14-grouped-v1/data.yaml": "5f6000375137a1d4be31ae0c51ea2a2f1667b3fd6d66b29c1312ffa0d62d375f",
+      "requirements-resolved.txt": "c47a1ede29fe0b8e18acc6fb7e1ce3813bc77ad1bde36aa99156c4ac30a09b17",
+      "train-bee-v14-baseline.py": "8e2f46f8002c9e5016614e3b1586b58b43303a54fef65c03deb780e7f0beb2b6",
+      "logs/bee-v14-baseline-status.json": "ce33475200602af3e3123f2920ea3678c86226e84a743175ae98d51d4e9f8b80"
+    },
+    "torch": "2.11.0+cu128",
+    "ultralytics": "8.4.162",
+    "gpu": "NVIDIA GeForce RTX 3060 Ti",
+    "test_split_evaluated": false,
+    "evaluation_script_sha256": "6be31458888ce5db25a310c2b905b55b8088f5fa7d32de62e0dfe3ae9594b30d",
+    "settings": {
+      "imgsz": 640,
+      "batch": 8,
+      "device": 0,
+      "half": false,
+      "collection_confidence": 0.001,
+      "nms_iou": 0.7,
+      "max_det": 300
+    }
+  },
+  "mean": {
+    "metrics/precision(B)": 0.8602501616051579,
+    "metrics/recall(B)": 0.6089588377723971,
+    "metrics/mAP50(B)": 0.6631188964047492,
+    "metrics/mAP50-95(B)": 0.390004097829137,
+    "fitness": 0.390004097829137
+  },
+  "per_class": [
+    {
+      "Class": "bee",
+      "Images": 13,
+      "Instances": 28,
+      "Box-P": 0.77357,
+      "Box-R": 0.28571,
+      "Box-F1": 0.4173,
+      "mAP50": 0.3663,
+      "mAP75": 0.28511,
+      "mAP50-95": 0.21569
+    },
+    {
+      "Class": "varroa",
+      "Images": 48,
+      "Instances": 118,
+      "Box-P": 0.94693,
+      "Box-R": 0.9322,
+      "Box-F1": 0.93951,
+      "mAP50": 0.95994,
+      "mAP75": 0.56487,
+      "mAP50-95": 0.56432
+    }
+  ],
+  "precision_recall_note": "Ultralytics summary operating point, not fixed deployment confidence.",
+  "fixed_thresholds": [
+    {
+      "confidence": 0.05,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 10,
+          "fp": 66,
+          "fn": 18,
+          "precision": 0.13157894736842105,
+          "recall": 0.35714285714285715
+        },
+        "varroa": {
+          "tp": 114,
+          "fp": 61,
+          "fn": 4,
+          "precision": 0.6514285714285715,
+          "recall": 0.9661016949152542
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 63,
+          "detected": 60,
+          "recall": 0.9523809523809523
+        },
+        ">=64px": {
+          "total": 55,
+          "detected": 54,
+          "recall": 0.9818181818181818
+        }
+      }
+    },
+    {
+      "confidence": 0.1,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 9,
+          "fp": 34,
+          "fn": 19,
+          "precision": 0.20930232558139536,
+          "recall": 0.32142857142857145
+        },
+        "varroa": {
+          "tp": 112,
+          "fp": 36,
+          "fn": 6,
+          "precision": 0.7567567567567568,
+          "recall": 0.9491525423728814
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 63,
+          "detected": 59,
+          "recall": 0.9365079365079365
+        },
+        ">=64px": {
+          "total": 55,
+          "detected": 53,
+          "recall": 0.9636363636363636
+        }
+      }
+    },
+    {
+      "confidence": 0.2,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 9,
+          "fp": 12,
+          "fn": 19,
+          "precision": 0.42857142857142855,
+          "recall": 0.32142857142857145
+        },
+        "varroa": {
+          "tp": 112,
+          "fp": 23,
+          "fn": 6,
+          "precision": 0.8296296296296296,
+          "recall": 0.9491525423728814
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 63,
+          "detected": 59,
+          "recall": 0.9365079365079365
+        },
+        ">=64px": {
+          "total": 55,
+          "detected": 53,
+          "recall": 0.9636363636363636
+        }
+      }
+    },
+    {
+      "confidence": 0.25,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 9,
+          "fp": 10,
+          "fn": 19,
+          "precision": 0.47368421052631576,
+          "recall": 0.32142857142857145
+        },
+        "varroa": {
+          "tp": 111,
+          "fp": 21,
+          "fn": 7,
+          "precision": 0.8409090909090909,
+          "recall": 0.940677966101695
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 63,
+          "detected": 58,
+          "recall": 0.9206349206349206
+        },
+        ">=64px": {
+          "total": 55,
+          "detected": 53,
+          "recall": 0.9636363636363636
+        }
+      }
+    },
+    {
+      "confidence": 0.3,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 9,
+          "fp": 8,
+          "fn": 19,
+          "precision": 0.5294117647058824,
+          "recall": 0.32142857142857145
+        },
+        "varroa": {
+          "tp": 111,
+          "fp": 18,
+          "fn": 7,
+          "precision": 0.8604651162790697,
+          "recall": 0.940677966101695
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 63,
+          "detected": 58,
+          "recall": 0.9206349206349206
+        },
+        ">=64px": {
+          "total": 55,
+          "detected": 53,
+          "recall": 0.9636363636363636
+        }
+      }
+    },
+    {
+      "confidence": 0.4,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 8,
+          "fp": 7,
+          "fn": 20,
+          "precision": 0.5333333333333333,
+          "recall": 0.2857142857142857
+        },
+        "varroa": {
+          "tp": 109,
+          "fp": 11,
+          "fn": 9,
+          "precision": 0.9083333333333333,
+          "recall": 0.923728813559322
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 63,
+          "detected": 56,
+          "recall": 0.8888888888888888
+        },
+        ">=64px": {
+          "total": 55,
+          "detected": 53,
+          "recall": 0.9636363636363636
+        }
+      }
+    },
+    {
+      "confidence": 0.5,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 8,
+          "fp": 2,
+          "fn": 20,
+          "precision": 0.8,
+          "recall": 0.2857142857142857
+        },
+        "varroa": {
+          "tp": 108,
+          "fp": 8,
+          "fn": 10,
+          "precision": 0.9310344827586207,
+          "recall": 0.9152542372881356
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 63,
+          "detected": 56,
+          "recall": 0.8888888888888888
+        },
+        ">=64px": {
+          "total": 55,
+          "detected": 52,
+          "recall": 0.9454545454545454
+        }
+      }
+    },
+    {
+      "confidence": 0.7,
+      "iou": 0.5,
+      "classes": {
+        "bee": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 23,
+          "precision": 1.0,
+          "recall": 0.17857142857142858
+        },
+        "varroa": {
+          "tp": 101,
+          "fp": 2,
+          "fn": 17,
+          "precision": 0.9805825242718447,
+          "recall": 0.8559322033898306
+        }
+      },
+      "varroa_short_side": {
+        "<16px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "16-32px": {
+          "total": 0,
+          "detected": 0,
+          "recall": null
+        },
+        "32-64px": {
+          "total": 63,
+          "detected": 50,
+          "recall": 0.7936507936507936
+        },
+        ">=64px": {
+          "total": 55,
+          "detected": 51,
+          "recall": 0.9272727272727272
+        }
+      }
+    }
+  ],
+  "threshold_matching": "Confidence-ordered class-aware one-to-one greedy matching at IoU >=0.5; separate predict pass, not internal AP matcher.",
+  "confusion_at_030": {
+    "confidence": 0.3,
+    "matching_iou": 0.5,
+    "matching": "Ultralytics class-agnostic IoU matching (distinct from threshold table)",
+    "axis_order": [
+      "bee",
+      "varroa",
+      "background"
+    ],
+    "rows": "predicted",
+    "columns": "true",
+    "matrix": [
+      [
+        9.0,
+        0.0,
+        8.0
+      ],
+      [
+        3.0,
+        111.0,
+        15.0
+      ],
+      [
+        16.0,
+        7.0,
+        0.0
+      ]
+    ]
+  },
+  "validation_composition": {
+    "images": 53,
+    "inferred_filename_groups": 11,
+    "mite_short_side_px": {
+      "min": 32.00000000000003,
+      "median": 58.24999999999997,
+      "max": 209.50000000000006
+    },
+    "mite_annotations_by_group": {
+      "12_jpeg": 2,
+      "17_jpg": 68,
+      "28_png": 1,
+      "2_jpg": 17,
+      "52_jpg": 14,
+      "61_jpg": 6,
+      "65_jpg": 5,
+      "69_jpg": 3,
+      "98_jpg": 2
+    }
+  },
+  "label_review_queue": [
+    {
+      "example_id": 0,
+      "image": "12_jpeg.rf.905d5a47bf2cd1e06fb9117c9caa90bb.jpg",
+      "group": "12_jpeg",
+      "issue": "Confirm flower-object varroa label and partial-bee box policy; bee missed at confidence 0.25.",
+      "status": "suspected; requires human review; labels unchanged"
+    },
+    {
+      "example_id": 13,
+      "image": "17_rotated_288_degrees_jpg.rf.b64f8a38cd888b91964e2f354985dfd5.jpg",
+      "group": "17_jpg",
+      "issue": "Review unmatched mite prediction near labelled mite: possible missing label or body-part/background confusion; do not auto-accept.",
+      "status": "suspected; requires human review; labels unchanged"
+    },
+    {
+      "example_id": 37,
+      "image": "52_jpg.rf.88720dfbf01caee7255a4abc32be3d13.jpg",
+      "group": "52_jpg",
+      "issue": "Review lowest labelled mite: difficult/blurred anatomy; missed in both mirrored versions (37,38).",
+      "status": "suspected; requires human review; labels unchanged"
+    },
+    {
+      "example_id": 39,
+      "image": "52_jpg.rf.e6e940907c9f4997c4c99aee1c025454.jpg",
+      "group": "52_jpg",
+      "issue": "Review omitted background bees and partial-object policy; same issue in mirrored image 40.",
+      "status": "suspected; requires human review; labels unchanged"
+    },
+    {
+      "example_id": 41,
+      "image": "61_jpg.rf.7153f5d2abf1dea7d45b7abb3d897121.jpg",
+      "group": "61_jpg",
+      "issue": "All 14 annotated bees missed at confidence 0.25; inspect additional unlabelled bees.",
+      "status": "suspected; requires human review; labels unchanged"
+    },
+    {
+      "example_id": 44,
+      "image": "65_jpg.rf.e5e4bdf2d7f76b825f9d0d128e54c63a.jpg",
+      "group": "65_jpg",
+      "issue": "Review all five mite labels with domain expert (four unmatched); visible adult bee has no bee label.",
+      "status": "suspected; requires human review; labels unchanged"
+    },
+    {
+      "example_id": 45,
+      "image": "68_jpg.rf.26ac1f88e9c5a5ae7323aefd94069b79.jpg",
+      "group": "68_jpg",
+      "issue": "Only two bees labelled despite additional visible bees; whole bees predicted as mites; also mirrored image 46.",
+      "status": "suspected; requires human review; labels unchanged"
+    },
+    {
+      "example_id": 52,
+      "image": "98_jpg.rf.b8b3f430ddbfb32bb0b3ae9f2388fbdf.jpg",
+      "group": "98_jpg",
+      "issue": "Visible partial adult bee has no bee label; bee predictions scored as unmatched. Define partial-object policy.",
+      "status": "suspected; requires human review; labels unchanged"
+    }
+  ]
+}

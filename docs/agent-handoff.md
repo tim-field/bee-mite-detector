@@ -1,5 +1,12 @@
 # Agent handoff: working Raspberry Pi varroa detector
 
+> **Training continuation:** the user has completed manual curation and exported
+> `training-artifacts/image-review/exports/bee-v14-entrance-v2` on the Mac
+> (277 training / 14 validation images). No training on this export has started.
+> Read the latest checkpoint at the top of [`training-handoff.md`](training-handoff.md)
+> for exact state and next steps, plus the earlier RTX 3060 Ti / WSL2 baseline.
+> The Pi deployment described below is unchanged.
+
 ## User intent and constraints
 
 The user is replicating this project using a Raspberry Pi, an IMX477 HQ camera,

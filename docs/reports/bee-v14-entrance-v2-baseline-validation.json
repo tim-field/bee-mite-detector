@@ -1,0 +1,337 @@
+{
+  "evaluation": "bee-v14-entrance-v2-baseline-val-review-v1",
+  "status": "provisional; revised validation labels not yet resolved",
+  "provisional_reasons": [
+    "8 of 14 validation images carry unresolved label-review concerns",
+    "all 4 missed mite boxes and 16 of 19 missed bee boxes at conf 0.25 occur in three flagged images",
+    "only 9 unique scenes (5 of 9 groups are exact mirror pairs)",
+    "no varroa box below 32 px short side, so tiny-mite recall is unmeasurable",
+    "no empty/background-only scenes, so false-alarm rate is unmeasurable"
+  ],
+  "checkpoint": {
+    "path": "runs/bee-v14-baseline/weights/best.pt",
+    "sha256": "c3b289284b5324be27b5176d0bdaac702529dcc14089c38bd37308ad4ceb052a"
+  },
+  "dataset": {
+    "path": "datasets/bee-v14-entrance-v2",
+    "manifest_sha256": "c6cb2c59f9ed8e730b5f1e73b51e897f16e47ef5cffbdf082ffcb662606da148",
+    "review_sha256": "678140a622cb8ad679036720b21d8a57f6594d598581395b872c763d6c918e33",
+    "images": 14,
+    "filename_groups": 9,
+    "bee_boxes": 28,
+    "varroa_boxes": 15,
+    "empty_label_files": 0
+  },
+  "settings": {
+    "imgsz": 640,
+    "batch": 8,
+    "device": 0,
+    "half": false,
+    "collection_confidence": 0.001,
+    "nms_iou": 0.7,
+    "max_det": 300
+  },
+  "split": "valid",
+  "test_split_evaluated": false,
+  "environment": {
+    "torch": "2.11.0+cu128",
+    "ultralytics": "8.4.162",
+    "gpu": "NVIDIA GeForce RTX 3060 Ti"
+  },
+  "per_class": {
+    "bee": {
+      "precision": 0.7753,
+      "recall": 0.28571,
+      "AP50": 0.37267,
+      "AP50-95": 0.21869,
+      "images": 13,
+      "instances": 28
+    },
+    "varroa": {
+      "precision": 0.80314,
+      "recall": 0.73333,
+      "AP50": 0.76711,
+      "AP50-95": 0.57518,
+      "images": 9,
+      "instances": 15
+    }
+  },
+  "mean": {
+    "precision": 0.7892169512270095,
+    "recall": 0.5095238095238095,
+    "AP50": 0.56988863754499,
+    "AP50-95": 0.39693475343507767
+  },
+  "comparison_original_53_image_val": {
+    "bee": {
+      "AP50": 0.3663,
+      "AP50-95": 0.2157,
+      "precision": 0.7736,
+      "recall": 0.2857
+    },
+    "varroa": {
+      "AP50": 0.95994,
+      "AP50-95": 0.5643,
+      "precision": 0.9469,
+      "recall": 0.9322
+    },
+    "mean": {
+      "AP50": 0.66312,
+      "AP50-95": 0.39,
+      "precision": 0.8603,
+      "recall": 0.609
+    }
+  },
+  "fixed_thresholds": [
+    {
+      "confidence": 0.05,
+      "bee": {
+        "tp": 10,
+        "fp": 55,
+        "fn": 18,
+        "precision": 0.15384615384615385,
+        "recall": 0.35714285714285715
+      },
+      "varroa": {
+        "tp": 12,
+        "fp": 21,
+        "fn": 3,
+        "precision": 0.36363636363636365,
+        "recall": 0.8
+      }
+    },
+    {
+      "confidence": 0.1,
+      "bee": {
+        "tp": 9,
+        "fp": 28,
+        "fn": 19,
+        "precision": 0.24324324324324326,
+        "recall": 0.32142857142857145
+      },
+      "varroa": {
+        "tp": 11,
+        "fp": 11,
+        "fn": 4,
+        "precision": 0.5,
+        "recall": 0.7333333333333333
+      }
+    },
+    {
+      "confidence": 0.2,
+      "bee": {
+        "tp": 9,
+        "fp": 10,
+        "fn": 19,
+        "precision": 0.47368421052631576,
+        "recall": 0.32142857142857145
+      },
+      "varroa": {
+        "tp": 11,
+        "fp": 7,
+        "fn": 4,
+        "precision": 0.6111111111111112,
+        "recall": 0.7333333333333333
+      }
+    },
+    {
+      "confidence": 0.25,
+      "bee": {
+        "tp": 9,
+        "fp": 8,
+        "fn": 19,
+        "precision": 0.5294117647058824,
+        "recall": 0.32142857142857145
+      },
+      "varroa": {
+        "tp": 11,
+        "fp": 7,
+        "fn": 4,
+        "precision": 0.6111111111111112,
+        "recall": 0.7333333333333333
+      }
+    },
+    {
+      "confidence": 0.3,
+      "bee": {
+        "tp": 9,
+        "fp": 7,
+        "fn": 19,
+        "precision": 0.5625,
+        "recall": 0.32142857142857145
+      },
+      "varroa": {
+        "tp": 11,
+        "fp": 7,
+        "fn": 4,
+        "precision": 0.6111111111111112,
+        "recall": 0.7333333333333333
+      }
+    },
+    {
+      "confidence": 0.4,
+      "bee": {
+        "tp": 8,
+        "fp": 6,
+        "fn": 20,
+        "precision": 0.5714285714285714,
+        "recall": 0.2857142857142857
+      },
+      "varroa": {
+        "tp": 11,
+        "fp": 4,
+        "fn": 4,
+        "precision": 0.7333333333333333,
+        "recall": 0.7333333333333333
+      }
+    },
+    {
+      "confidence": 0.5,
+      "bee": {
+        "tp": 8,
+        "fp": 1,
+        "fn": 20,
+        "precision": 0.8888888888888888,
+        "recall": 0.2857142857142857
+      },
+      "varroa": {
+        "tp": 11,
+        "fp": 3,
+        "fn": 4,
+        "precision": 0.7857142857142857,
+        "recall": 0.7333333333333333
+      }
+    },
+    {
+      "confidence": 0.7,
+      "bee": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 23,
+        "precision": 1.0,
+        "recall": 0.17857142857142858
+      },
+      "varroa": {
+        "tp": 11,
+        "fp": 1,
+        "fn": 4,
+        "precision": 0.9166666666666666,
+        "recall": 0.7333333333333333
+      }
+    }
+  ],
+  "varroa_short_side": {
+    "<16px": {
+      "total": 0,
+      "detected": 0,
+      "recall": null
+    },
+    "16-32px": {
+      "total": 0,
+      "detected": 0,
+      "recall": null
+    },
+    "32-64px": {
+      "total": 13,
+      "detected": 9,
+      "recall": 0.6923076923076923
+    },
+    ">=64px": {
+      "total": 2,
+      "detected": 2,
+      "recall": 1.0
+    }
+  },
+  "errors_at_conf_0_25": {
+    "0": {
+      "group": "12_jpeg",
+      "matches": 1,
+      "missed_truth": 1,
+      "unmatched_predictions": 0
+    },
+    "1": {
+      "group": "12_jpeg",
+      "matches": 2,
+      "missed_truth": 0,
+      "unmatched_predictions": 1
+    },
+    "2": {
+      "group": "28_png",
+      "matches": 2,
+      "missed_truth": 0,
+      "unmatched_predictions": 0
+    },
+    "3": {
+      "group": "2_jpg",
+      "matches": 2,
+      "missed_truth": 0,
+      "unmatched_predictions": 2
+    },
+    "4": {
+      "group": "52_jpg",
+      "matches": 3,
+      "missed_truth": 0,
+      "unmatched_predictions": 2
+    },
+    "5": {
+      "group": "52_jpg",
+      "matches": 3,
+      "missed_truth": 0,
+      "unmatched_predictions": 0
+    },
+    "6": {
+      "group": "61_jpg",
+      "matches": 0,
+      "missed_truth": 14,
+      "unmatched_predictions": 0
+    },
+    "7": {
+      "group": "65_jpg",
+      "matches": 1,
+      "missed_truth": 4,
+      "unmatched_predictions": 3
+    },
+    "8": {
+      "group": "68_jpg",
+      "matches": 0,
+      "missed_truth": 2,
+      "unmatched_predictions": 3
+    },
+    "9": {
+      "group": "68_jpg",
+      "matches": 0,
+      "missed_truth": 2,
+      "unmatched_predictions": 2
+    },
+    "10": {
+      "group": "69_jpg",
+      "matches": 2,
+      "missed_truth": 0,
+      "unmatched_predictions": 1
+    },
+    "11": {
+      "group": "69_jpg",
+      "matches": 2,
+      "missed_truth": 0,
+      "unmatched_predictions": 0
+    },
+    "12": {
+      "group": "89_jpg",
+      "matches": 1,
+      "missed_truth": 0,
+      "unmatched_predictions": 0
+    },
+    "13": {
+      "group": "89_jpg",
+      "matches": 1,
+      "missed_truth": 0,
+      "unmatched_predictions": 1
+    }
+  },
+  "artifacts": {
+    "mac": "training-artifacts/bee-v14-entrance-v2-baseline-val-review-v1 (Git-ignored)",
+    "wsl": "/home/tim/bee-mite-training/evaluations/bee-v14-entrance-v2-baseline-val-review-v1",
+    "log": "/home/tim/bee-mite-training/logs/bee-v14-entrance-v2-baseline-val-review-v1.log",
+    "script_sha256": "de3c393f2f7dc6946b7477f44c67d6443f92ae15c60c591fb88da3a5fc8f1543"
+  }
+}

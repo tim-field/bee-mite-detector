@@ -9,6 +9,10 @@
 
 📄 **[Read the Full Research Paper](docs/001252261-FYP_Report.pdf)**
 
+**Custom training in this fork:** use the [local dataset review tool](docs/dataset-review.md)
+to exclude out-of-scope images safely. See the [baseline validation review](docs/bee-v14-baseline-validation.md)
+for our results; the original project's metrics below are not measurements of our new model.
+
 ## Project Overview
 
 This project addresses the ongoing threat posed by *Varroa destructor* mites to honeybee populations by introducing a non-invasive, real-time detection system using deep learning. Traditional monitoring methods are labour-intensive, inconsistent, and delayed in response, leading to late-stage infestations and colony decline.

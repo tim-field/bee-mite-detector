@@ -1,3 +1,6 @@
+# Local training review artifacts (checkpoints, images, raw predictions)
+/training-artifacts/
+
 # Local Raspberry Pi setup and runtime data
 .deps/
 .venv/
